@@ -77,7 +77,7 @@ public class MemTable {
             if (modification == null) {
                 return null;
             }
-            if(modification.getModification() == null){
+            if (modification.getModification() == null) {
                 return SSTable.lookup(table, key); // Try the SSTable if not found in the cache
             }
             return modification.getModification();
@@ -97,11 +97,12 @@ public class MemTable {
 
             commitLog.write(table, key, modification); // Write to the commit log first
 
-            if (tableModifications.computeIfPresent(key, (x, modifications) -> {
+            var existing = tableModifications.computeIfPresent(key, (x, modifications) -> {
                 modifications.add(modification);
                 currentTableSizeBytes.addAndGet(modification.getSizeBytes());
                 return modifications;
-            }) == null) {
+            });
+            if (existing == null) {
                 currentTableSizeBytes.addAndGet(key.getKey().length() + modification.getSizeBytes());
                 tableModifications.put(key, new TreeSet<>() {{
                     add(modification);
@@ -146,5 +147,18 @@ public class MemTable {
         SortedMap<MemTableKey, TreeSet<Modification>> modifications = new TreeMap<>(tableModifications);
         this.tableModifications = new TreeMap<>();
         return modifications;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        MemTable memTable = (MemTable) o;
+        return table.equals(memTable.table);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(table);
     }
 }

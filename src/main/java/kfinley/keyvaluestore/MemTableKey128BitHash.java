@@ -9,15 +9,17 @@ public class MemTableKey128BitHash implements MemTableKey {
 
     private final String key;
     private final HashCode hashCode;
+    private final long hashLong;
 
     MemTableKey128BitHash(String key) {
         this.key = key;
         this.hashCode = Hashing.murmur3_128().hashString(key, StandardCharsets.UTF_8);
+        this.hashLong = hashCode.asLong();
     }
 
     @Override
     public long getHash() {
-        return hashCode.asLong();
+        return hashLong;
     }
 
     @Override
