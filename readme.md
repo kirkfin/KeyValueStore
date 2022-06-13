@@ -1,4 +1,4 @@
-## A Cassandra-style, single node, key/value store implementation 
+## A Cassandra-style, single node key/value store implementation 
 * Write flow:
 *       1) Write modification to CommitLog
 *       2) Write modifications MemTable cache
