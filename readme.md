@@ -1,1 +1,1 @@
-### WIP single node key/value store implementation 
+### A cassandra-style, single node, key/value store implementation 

@@ -11,4 +11,8 @@ public class SSTable {
     public void flush() {
 
     }
+
+    public static String lookup(String table, MemTableKey key){
+        return null;
+    }
 }

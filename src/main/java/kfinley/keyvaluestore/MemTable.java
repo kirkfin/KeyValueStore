@@ -7,7 +7,9 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
 /***
- * Single threaded MemTable implementation: put/get/delete operations are synchronous on the local thread
+ * Single threaded MemTable implementation: PUT/GET/DELETE operations are synchronous on the local worker thread
+ * - This class provides `getSizeBytes` so that capacity flushes may be triggered externally by calling `triggerFlush`
+ * - TODO: Implement CommitLog and SSTable
  */
 public class MemTable {
 
@@ -75,6 +77,9 @@ public class MemTable {
             if (modification == null) {
                 return null;
             }
+            if(modification.getModification() == null){
+                return SSTable.lookup(table, key); // Try the SSTable if not found in the cache
+            }
             return modification.getModification();
         }).get();
     }
@@ -105,14 +110,19 @@ public class MemTable {
         }).get();
     }
 
+    /***
+     * Trigger a flush of the local cache, storing the modifications as a new SSTable on disk
+     */
     public Future<SortedMap<MemTableKey, Modification>> triggerFlush() {
-        flushLock.lock();
-        try {
-            SortedMap<MemTableKey, TreeSet<Modification>> flushedBatch = flush();
-            return flushThread.submit(() -> executeFlush(flushedBatch));
-        } finally {
-            flushLock.unlock();
+        if (flushLock.tryLock()) {
+            try {
+                SortedMap<MemTableKey, TreeSet<Modification>> flushedBatch = flush();
+                return flushThread.submit(() -> executeFlush(flushedBatch));
+            } finally {
+                flushLock.unlock();
+            }
         }
+        return null;
     }
 
     /***

@@ -4,6 +4,18 @@ import java.util.SortedSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/***
+ * A Single node key/value store implementation
+ * - Support for Key/Values of type String
+ * - Table read/writes are synchronous, but each table (MemTable) has an exclusive worker thread
+ * - Write flow:
+ *       1) Write modification to CommitLog
+ *       2) Write modifications MemTable cache
+ *       3) When MemTable exceeds capacity, flush modifications to SSTable
+ * - Read flow:
+ *       1) Check MemTable cache
+ *       2) Check SSTable
+ */
 public class KVStore {
 
     static final MemTableKeyFactory DEFAULT_KEY_FACTORY = MemTableKey128BitHash::new;
@@ -18,7 +30,7 @@ public class KVStore {
     private final long memTableMaxSizeBytes;
 
     /***
-     * Default settings constructor
+     * Constructor with default settings
      */
     public KVStore() {
         this(DEFAULT_KEY_FACTORY,
