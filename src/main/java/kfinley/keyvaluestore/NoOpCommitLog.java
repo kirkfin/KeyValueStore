@@ -2,6 +2,9 @@ package kfinley.keyvaluestore;
 
 import java.util.logging.Logger;
 
+/***
+ * Commit log stub for testing
+ */
 public class NoOpCommitLog implements CommitLog {
 
     private final Logger logger = Logger.getLogger(getClass().getName());

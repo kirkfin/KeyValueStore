@@ -1,5 +1,8 @@
 package kfinley.keyvaluestore;
 
+/***
+ * Represents an immutable value modification, sortable by timestamp
+ */
 public class Modification implements Comparable<Modification> {
 
     private final String modification;
